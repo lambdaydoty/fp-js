@@ -91,7 +91,7 @@ Ramda                         | Sanctuary
 `R.into()`                    |
 `R.invert()`                  |
 `R.invertObj()`               |
-`R.invoker()`                 |
+`R.invoker()`                 | Prefer `x => x.method(...)`
 `R.is(X, x)`                  | `S.is (X) (x)`
 `R.isArrayLike()`             |
 `R.isEmpty()`                 |
