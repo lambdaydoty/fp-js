@@ -39,13 +39,13 @@ function logToTx (log) {
 
 console.log('')
 console.log('@future')
-const { env: flutureEnv, FutureType } = require('fluture-sanctuary-types')
-const $ = require('sanctuary-def')
+const FlutureSanctuaryTypes = require('fluture-sanctuary-types')
+const { env: flutureEnv } = FlutureSanctuaryTypes
 const { create, env } = require('sanctuary')
 const S = create({ checkTypes: true, env: env.concat(flutureEnv) })
 const { map, filter, pipe } = S
 const { chain, parallel, encaseP, fork } = require('fluture')
-const def = $.create({ checkTypes: true, env: env.concat(flutureEnv) })
+// const def = $.create({ checkTypes: true, env: env.concat(flutureEnv) })
 
 const log = x => y => console.log(x, y)
 // const uncurry = f => arr => arr.reduce((p, c) => p(c), f)
@@ -54,6 +54,8 @@ const log = x => y => console.log(x, y)
 // const trampline = fn => (...args) => {}
 // const { isEmpty } = R
 
+// const $ = require('sanctuary-def')
+// const { FutureType } = FlutureSanctuaryTypes
 // const task = uncurry(def)([
 //   'task',
 //   {},
@@ -67,7 +69,7 @@ const log = x => y => console.log(x, y)
 //   ]),
 // ])
 
-const task =  pipe([
+const task = pipe([
   encaseP(getReceipts),
   map(map(encaseP(decode))),
   chain(parallel(2)),

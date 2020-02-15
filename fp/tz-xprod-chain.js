@@ -2,7 +2,6 @@ const R = require('ramda')
 const {
   map,
   of,
-  always,
   chain,
   apply,
   toPairs,
@@ -24,11 +23,10 @@ const test0 = {
 // -> [[[a], [1, 2, 3]], [[b], [4, 5]]]
 // -> [[a, 1], [a, 2], [a, 3], [b, 4], [b, 5]]
 const result = pipe(
-  always(test0),
   toPairs,
   map(map(wrapper)),
   chain(apply(xprod)),
-)()
+)(test0)
 console.log(result)
 // [['a', 1], ['a', 2], ['a', 3], ['b', 4], ['b', 5]]
 
@@ -52,3 +50,40 @@ console.log('chain(copy)([1, 2, 3, 4]) ===', chain(copy)([1, 2, 3, 4]))
 console.log('chain(add)(square) === x => add(square(x))(x)', 10, chain(add)(square)(10))
 console.log('chain(append)(head) === x => append(head(x))(x)', [1, 2, 3], chain(R.append)(R.head)([1, 2, 3]))
 console.log('@^^note: actually the docuemnt example use lists but chain in this case has nothing special to do with a list!')
+
+;(() => {
+  console.log('')
+  console.log('@Sanctuary')
+  const { create, env } = require('sanctuary')
+  const S = create({ checkTypes: true, env })
+  const _S = create({ checkTypes: false, env })
+  const { pipe, pair, pairs, fst, snd, map, mapLeft, of, lift2, Pair } = S
+  const { ap: _ap } = _S
+
+  // x -> [x]
+  const wrap = of(Array)
+  // [x] -> [y] -> [[x,y]]
+  const xprod = lift2(Pair)
+  // (a,b) -> [a,b]
+  const _pairToArray = _ap([fst, snd]) // dealt with `heterogeneous array`
+
+  // method 1
+  pipe([
+    pairs, // { k: v } -> [[k,v]]
+    map(mapLeft(wrap)),
+    chain(pair(xprod)),
+    map(wrap),
+    map(_pairToArray),
+    console.log,
+  ])(test0)
+
+  // method 2
+  pipe([
+    pairs,
+    map(mapLeft(Pair)),
+    chain(pair(map)),
+    map(wrap),
+    map(_pairToArray),
+    console.log,
+  ])(test0)
+})()
