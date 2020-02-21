@@ -11,17 +11,15 @@ const {
   flatten,
 } = R
 
-const wrapper = o(flatten, of) // x -> [x] | x
-
-const test0 = {
-  a: [1, 2, 3],
-  b: [4, 5],
-}
-
 // { a: [1, 2, 3], b: [4, 5] }
 // -> [[a, [1, 2, 3]], [b, [4, 5]]]
 // -> [[[a], [1, 2, 3]], [[b], [4, 5]]]
 // -> [[a, 1], [a, 2], [a, 3], [b, 4], [b, 5]]
+const test0 = {
+  a: [1, 2, 3],
+  b: [4, 5],
+}
+const wrapper = o(flatten, of) // x -> [x] | x
 const result = pipe(
   toPairs,
   map(map(wrapper)),
@@ -51,6 +49,8 @@ console.log('chain(add)(square) === x => add(square(x))(x)', 10, chain(add)(squa
 console.log('chain(append)(head) === x => append(head(x))(x)', [1, 2, 3], chain(R.append)(R.head)([1, 2, 3]))
 console.log('@^^note: actually the docuemnt example use lists but chain in this case has nothing special to do with a list!')
 
+/* eslint no-multi-spaces: ["error", { ignoreEOLComments: true  }] */
+
 ;(() => {
   console.log('')
   console.log('@Sanctuary')
@@ -69,11 +69,11 @@ console.log('@^^note: actually the docuemnt example use lists but chain in this 
 
   // method 1
   pipe([
-    pairs, // { k: v } -> [[k,v]]
-    map(mapLeft(wrap)),
-    chain(pair(xprod)),
-    map(wrap),
-    map(_pairToArray),
+    pairs,              // :: Array (Pair k Array)
+    map(mapLeft(wrap)), // :: Array (Pair Array Array)
+    chain(pair(xprod)), // :: Array (Pair a b)
+    map(wrap),          // :: Array (Array (Pair a b))
+    map(_pairToArray),  // :: Array (Array2 a b)
     console.log,
   ])(test0)
 
@@ -86,4 +86,12 @@ console.log('@^^note: actually the docuemnt example use lists but chain in this 
     map(_pairToArray),
     console.log,
   ])(test0)
+
+  // // method 3 (maybe the clearest)
+  // pipe([
+  //   wrap,
+  //   _S.ap([S.keys, S.values]),
+  //   ...,
+  //   console.log,
+  // ])(test0)
 })()

@@ -11,9 +11,55 @@
  * @return {Node}
  */
 var copyRandomList = function (head) {
+  if (head === null) return null
 
+  const clone = node => {
+    const cloned = {
+      val: node.val,
+      next: null,
+      random: null,
+    }
+    node.cloned = cloned // !side effect
+    return cloned
+  }
 
-};
+  let prev = null
+  for (let ptr = head; ptr; ptr = ptr.next) {
+    // copy `val`
+    const cloned =
+      (ptr.cloned !== undefined) ? ptr.cloned
+        : /* otherwise */ clone(ptr)
+
+    // copy `next`
+    if (prev) {
+      prev.next = cloned
+    }
+
+    // copy `random`
+    cloned.random =
+      (ptr.random === null) ? null
+        : (ptr.random.cloned) ? ptr.random.cloned
+          : /* otherwise */ clone(ptr.random)
+
+    prev = cloned
+
+    // debug
+    // console.log({ cloned })
+  }
+
+  const ans = head.cloned
+
+  return ans
+
+  // const util = require('util')
+  // console.log('')
+  // console.log(util.inspect(
+  //   ans,
+  //   false,
+  //   null,
+  //   true,
+  // ))
+}
 
 function build (val, next = null) {
   return {
@@ -42,15 +88,16 @@ arr0[2].random = arr0[4]
 arr0[3].random = arr0[2]
 arr0[4].random = arr0[0]
 
-const util = require('util')
+copyRandomList(test0)
 
-console.log(util.inspect(
-  test0,
-  false,
-  null,
-  true,
-))
+// const util = require('util')
+// console.log(util.inspect(
+//   test0,
+//   false,
+//   null,
+//   true,
+// ))
 
-console.log(toArray(
-  test0,
-))
+// console.log(toArray(
+//   test0,
+// ))
