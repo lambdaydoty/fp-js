@@ -1,3 +1,12 @@
+/**
+ * Naming Conventions:
+ *  S = require('sanctuary')
+ *  $ = require('sanctuary-def')
+ *  Z = require('sanctuary-type-classes')
+ *  F = require('fluture')
+ *  type = require('sanctuary-type-identifiers')
+ *
+ */
 const U = {
   uncurry: f => arr => arr.reduce((p, c) => p(c), f),
   tap: f => x => (f(x), x), // eslint-disable-line no-sequences
@@ -23,6 +32,7 @@ module.exports = {
   F,
   FT,
   def,
+  show: require('sanctuary-show'),
 }
 
 // const { parallel, encaseP, fork } = F

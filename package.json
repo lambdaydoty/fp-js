@@ -23,7 +23,8 @@
     "js-priority-queue": "^0.1.5",
     "ramda": "^0.27.0",
     "ramda-fantasy": "^0.8.0",
-    "sanctuary": "^3.0.0"
+    "sanctuary": "^3.0.0",
+    "sanctuary-type-identifiers": "^3.0.0"
   },
   "devDependencies": {
     "eslint-plugin-better": "^0.1.5",
