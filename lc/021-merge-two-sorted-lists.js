@@ -1,16 +1,17 @@
+const { trampoline, thunk } = require('../sak')
 /**
  * @param {ListNode} l1
  * @param {ListNode} l2
  * @return {ListNode}
  */
 var mergeTwoLists = function (l1, l2) {
-  const trampoline = fn => (...args) => {
-    let result = fn(...args)
-    while (typeof result === 'function') {
-      result = result()
-    }
-    return result
-  }
+  // const trampoline = fn => (...args) => {
+  //   let result = fn(...args)
+  //   while (typeof result === 'function') {
+  //     result = result()
+  //   }
+  //   return result
+  // }
 
   let result = null
   trampoline(merge)(l1, l2, r => { result = r })
@@ -24,8 +25,8 @@ var mergeTwoLists = function (l1, l2) {
     if (l2 === null) return conti(l1)
     // l1 !== null && l2 !== null
     return (v1 <= v2)
-      ? () => merge(n1, l2, r => conti(build(v1, r))) // thunkify
-      : () => merge(l1, n2, r => conti(build(v2, r))) // thunkify
+      ? thunk(merge(n1, l2, r => conti(build(v1, r))))
+      : thunk(merge(l1, n2, r => conti(build(v2, r))))
   }
 }
 

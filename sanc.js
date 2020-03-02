@@ -18,7 +18,7 @@ const F = require('fluture')
 const FT = require('fluture-sanctuary-types')
 
 const options = {
-  checkTypes: true,
+  checkTypes: false,
   env: [..._S.env, ...FT.env],
 }
 

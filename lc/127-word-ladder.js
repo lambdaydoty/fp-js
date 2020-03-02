@@ -5,35 +5,43 @@
  * @return {number}
  */
 var ladderLength = function (beginWord, endWord, wordList) {
-  // return [
-  //   beginWord,
-  //   endWord,
-  //   wordList,
-  // ]
+  const nodes = Array.from(
+    [beginWord, ...wordList],
+    (v, i, _) => ({ val: v, visited: false }),
+  )
 
   const queue = []
-
   function bfs (start, goal) {
-    const n = start
-    n.visited = true
-    queue.push(n)
+    start.visited = true
+    queue.push(start)
     while (queue.length !== 0) {
+      // console.log({ queue })
       const x = queue.shift()
-      if (x === goal) return x
+      // console.log({ x })
+      if (x.val === goal) return x
       for (const y of adjacent(x)) {
         if (!y.visited) {
+          // console.log({ y })
           y.visited = true
+          y.parent = x
           queue.push(y)
         }
       }
     }
+    return start
   }
 
-  return adjacent('log', wordList)
+  let ptr = bfs(nodes[0], endWord)
 
-  function adjacent (x, nodes) {
+  if (ptr === nodes[0]) return 0
+
+  let count = 1
+  for (; ptr.parent; ptr = ptr.parent) { count++ }
+  return count
+
+  function adjacent (x) {
     return nodes
-      .filter(y => diffByAtMostOne(x, y))
+      .filter(y => diffByAtMostOne(x.val, y.val))
       .filter(y => y !== x)
   }
 
@@ -53,5 +61,12 @@ console.log(
     'hit',
     'cog',
     ['hot', 'dot', 'dog', 'lot', 'log', 'cog'],
+  )
+)
+console.log(
+  ladderLength(
+    'hit',
+    'cog',
+    ['hot', 'dot', 'dog', 'lot', 'log'],
   )
 )

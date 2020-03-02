@@ -12,7 +12,7 @@ const Writer = log => val => {
 
 Writer['fantasy-land/of'] = x => Writer('')(x)
 
-const writerTypeIdent = 'my-package/Writer@1'
+const writerTypeIdent = 'jws/Writer@1'
 
 const Writer$prototype = {
   '@@type': writerTypeIdent,
@@ -35,7 +35,7 @@ const Writer$prototype = {
 }
 
 /**
- * For type-checking ...
+ * For type-checking
  */
 
 const uncurry = f => arr => arr.reduce((p, c) => p(c), f)
