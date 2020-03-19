@@ -1,19 +1,13 @@
 
-const {
-  S: { lift2 },
-  F: { fork, resolve },
-} = require('./sanc-boilerplate')
+const { S, F } = require('./sanc')
+const { uncurry } = require('./sak')
 
-fork(
-  console.error
-)(
-  console.log
-)(
-  lift2(
-    x => y => x + y
-  )(
-    resolve('Hello, ')
-  )(
-    resolve('world!')
-  )
+uncurry(F.fork)(
+  console.error,
+  console.log,
+  uncurry(S.lift2)(
+    x => y => x + y,
+    F.resolve('Hello, '),
+    F.resolve('world!'),
+  ),
 )

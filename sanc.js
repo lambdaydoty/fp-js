@@ -7,32 +7,26 @@
  *  type = require('sanctuary-type-identifiers')
  *
  */
-const U = {
-  uncurry: f => arr => arr.reduce((p, c) => p(c), f),
-  tap: f => x => (f(x), x), // eslint-disable-line no-sequences
-  trampline: fn => (...args) => {}, // TODO
-}
-const _S = require('sanctuary')
+const S = require('sanctuary')
 const $ = require('sanctuary-def')
+const show = require('sanctuary-show')
+const type = require('sanctuary-type-identifiers')
 const F = require('fluture')
-const FT = require('fluture-sanctuary-types')
+const F$ = require('fluture-sanctuary-types')
 
 const options = {
   checkTypes: false,
-  env: [..._S.env, ...FT.env],
+  env: [...S.env, ...F$.env],
 }
-
-const S = _S.create(options)
-const def = $.create(options)
 
 module.exports = {
   $,
-  U,
-  S,
+  S: S.create(options),
+  def: $.create(options),
   F,
-  FT,
-  def,
-  show: require('sanctuary-show'),
+  F$,
+  show,
+  type,
 }
 
 // const { parallel, encaseP, fork } = F

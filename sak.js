@@ -3,8 +3,8 @@ const I = x => x
 const K = x => y => x
 const S = f => g => x => f(x)(g(x))
 
-const A = f => x => f(x) // Apply
-const T = x => f => f(x) // Thrush
+const A = f => x => f(x) // apply
+const T = x => f => f(x) // thrush
 const B = x => f => g => f(g(x)) // Compose
 
 // :: g -> x -> x
@@ -12,8 +12,8 @@ const tap = S(K)
 
 const uncurry =
   fn =>
-    ar =>
-      ar.reduce((f, x) => f(x), fn) // A!
+    (...args) =>
+      args.reduce((f, x) => f(x), fn) // A!
 
 const curryN =
   n =>
@@ -86,7 +86,10 @@ const memoize =
       }
     }
 
-const apply = f => ar => f(...ar)
+const apply =
+  f =>
+    ar =>
+      f(...ar)
 
 module.exports = {
   I,
@@ -106,4 +109,6 @@ module.exports = {
   repeat,
   memoize,
   apply,
+  thrush: T,
+  applyTo: T,
 }

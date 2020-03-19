@@ -1,6 +1,5 @@
-const { show } = require('sanctuary')
-const $ = require('sanctuary-def')
-const type = require('sanctuary-type-identifiers')
+const { type, show, $ } = require('./sanc')
+const { uncurry } = require('./sak')
 
 //    Writer :: String -> a -> Writer String a
 const Writer = log => val => {
@@ -34,18 +33,12 @@ const Writer$prototype = {
   constructor: Writer,
 }
 
-/**
- * For type-checking
- */
-
-const uncurry = f => arr => arr.reduce((p, c) => p(c), f)
-
-const WriterType = uncurry($.UnaryType)([
+const WriterType = uncurry($.UnaryType)(
   'Writer',
   'http://',
   [],
   x => type(x) === writerTypeIdent,
   ({ val }) => [val],
-])
+)
 
 module.exports = { WriterType, Writer }
