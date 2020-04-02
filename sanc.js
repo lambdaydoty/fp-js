@@ -13,38 +13,24 @@ const show = require('sanctuary-show')
 const type = require('sanctuary-type-identifiers')
 const F = require('fluture')
 const F$ = require('fluture-sanctuary-types')
+const Z = require('sanctuary-type-classes')
+const daggy = require('daggy')
 
-const options = {
-  checkTypes: false,
-  env: [...S.env, ...F$.env],
-}
+const env = [
+  ...S.env,
+  ...F$.env,
+]
 
 module.exports = {
+  Z,
   $,
-  S: S.create(options),
-  def: $.create(options),
   F,
   F$,
+  S: S.create({ checkTypes: true, env }),
+  def: $.create({ checkTypes: true, env }),
+  _S: S.create({ checkTypes: false, env }),
   show,
   type,
+  daggy,
+  ...require('./sak'),
 }
-
-// const { parallel, encaseP, fork } = F
-// const { pipe } = S
-
-// const inc = def([
-//   'inc',
-//   {},
-//   [$.Number, $.Number],
-//   x => x + 1,
-// ])
-
-// pipe([
-//   U.tap(console.log),
-//   inc,
-//   U.tap(console.log),
-//   inc,
-//   U.tap(console.log),
-// ])(100)
-
-// console.log(F.parallel)

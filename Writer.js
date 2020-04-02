@@ -1,17 +1,44 @@
-const { type, show, $ } = require('./sanc')
+const util = require('util')
+const { type, show, $, S: _S } = require('./sanc')
 const { uncurry } = require('./sak')
 
-//    Writer :: String -> a -> Writer String a
-const Writer = log => val => {
-  const writer = Object.create(Writer$prototype)
-  writer.val = val
-  writer.log = log
-  return writer
-}
-
-Writer['fantasy-land/of'] = x => Writer('')(x)
-
 const writerTypeIdent = 'jws/Writer@1'
+
+const $Writer = uncurry($.UnaryType)(
+  'Writer',
+  'http://',
+  [],
+  x => type(x) === writerTypeIdent,
+  writer => [writer.val],
+)
+
+const S = _S.create({
+  checkTypes: true,
+  env: $.env.concat([$Writer($.Unknown)]),
+})
+
+const def = $.create({
+  checkTypes: true,
+  env: $.env.concat([$Writer($.Unknown)]),
+})
+
+const a = $.TypeVariable('a')
+
+// :: String -> a -> Writer a
+const Writer = uncurry(def)(
+  'Writer',
+  {},
+  [$.String, a, $Writer(a)],
+  log =>
+    val => Object.assign(
+      Object.create(Writer$prototype),
+      { log, val }, // use POJO
+    ),
+)
+
+Writer['fantasy-land/of'] =
+  x =>
+    Writer('')(x)
 
 const Writer$prototype = {
   '@@type': writerTypeIdent,
@@ -20,6 +47,9 @@ const Writer$prototype = {
     const _val = show(this.val)
     return `Writer (${_log}) (${_val})`
   },
+
+  [util.inspect.custom]: function () { return show(this) },
+
   'fantasy-land/map': function (f) {
     return Writer(this.log)(f(this.val))
   },
@@ -30,15 +60,8 @@ const Writer$prototype = {
     const { log, val } = f(this.val)
     return Writer(this.log + log)(val)
   },
+
   constructor: Writer,
 }
 
-const WriterType = uncurry($.UnaryType)(
-  'Writer',
-  'http://',
-  [],
-  x => type(x) === writerTypeIdent,
-  ({ val }) => [val],
-)
-
-module.exports = { WriterType, Writer }
+module.exports = { type, show, $Writer, Writer, def, S, $, uncurry }

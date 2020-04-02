@@ -7,6 +7,8 @@ const A = f => x => f(x) // apply
 const T = x => f => f(x) // thrush
 const B = x => f => g => f(g(x)) // Compose
 
+const Y = f => (g => g(g))(g => f(x => g(g)(x))) // applicative
+
 // :: g -> x -> x
 const tap = S(K)
 
@@ -49,13 +51,6 @@ const Counter = function * (start = 0, end = Number.MAX_SAFE_INTEGER) {
 
 const isNil = x => x == null
 
-// Array.prototype.chain = // eslint-disable-line
-//   function (fn) {
-//     return this.reduce(
-//       (acc, x) => acc.concat(fn(x)),
-//       [],
-//     )
-//   }
 const chain =
   fn =>
     ar =>
@@ -94,10 +89,11 @@ const apply =
 module.exports = {
   I,
   K,
-  S,
+  // S,
   A,
   T,
   B,
+  Y,
   tap,
   curry,
   uncurry,
@@ -109,6 +105,4 @@ module.exports = {
   repeat,
   memoize,
   apply,
-  thrush: T,
-  applyTo: T,
 }
