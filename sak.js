@@ -5,7 +5,7 @@ const S = f => g => x => f(x)(g(x))
 
 const A = f => x => f(x) // apply
 const T = x => f => f(x) // thrush
-const B = x => f => g => f(g(x)) // Compose
+const B = f => g => x => f(g(x)) // Compose
 
 const Y = f => (g => g(g))(g => f(x => g(g)(x))) // applicative
 
@@ -33,7 +33,7 @@ const trampoline =
       for (
         res = fn(...args);
         typeof res === 'function';
-        res = res()
+        res = res() /* ! */
       );
       return res
     }
