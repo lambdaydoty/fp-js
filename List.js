@@ -128,11 +128,6 @@ const $static = {
     return Nil
   },
 
-  // :: Monoid m => () -> m
-  [empty] () {
-    return Nil
-  },
-
   // :: Applicative f => a -> f a
   [_of] (x) {
     return Cons (x) (Nil)
