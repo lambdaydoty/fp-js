@@ -26,3 +26,4 @@
 ## Misc.
 
 * [FantasyLand Cheatsheet](https://delapouite.com/ramblings/fantasy-land-cheat-sheet.html)
+* [Avaq Intro. Fluture]https://dev.to/avaq/fluture-a-functional-alternative-to-promises-21b
