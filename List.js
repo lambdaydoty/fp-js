@@ -1,5 +1,5 @@
 /* eslint func-call-spacing: ["error", "always"] */
-const { type, show, daggy, $, uncurry } = require ('./sanc')
+const { type, show, daggy, $, uncurry } = require ('./sanctuary')
 const util = require ('util')
 
 const listIdentifier = 'jws/list'
@@ -133,57 +133,68 @@ const $static = {
     return Cons (x) (Nil)
   },
 
-  // data constructor
-  from (arr) {
-    return arr.reduceRight (
-      (xs, x) => Cons (x) (xs),
-      Nil,
-    )
-  },
+  // :: Array a -> List a
+  from: uncurry (def) (
+    'from',
+    {},
+    [$.Array (a), $List (a)],
+    arr =>
+      arr.reduceRight (
+        (xs, x) => Cons (x) (xs),
+        Nil,
+      )
+  ),
+  // from (arr) {
+  //   return arr.reduceRight (
+  //     (xs, x) => Cons (x) (xs),
+  //     Nil,
+  //   )
+  // },
 }
 
 Object.assign (List.prototype, $prototype)
 Object.assign (List, $static)
 
-const list1 =
-  Cons (1) (
-    Cons (2) (
-      Cons (3) (
-        Cons (4) (
-          Nil
-        )
-      )
-    )
-  )
+// const list1 =
+//   Cons (1) (
+//     Cons (2) (
+//       Cons (3) (
+//         Cons (4) (
+//           Nil
+//         )
+//       )
+//     )
+//   )
 
-const list2 = List.from ([3, 2, 1])
+// const list2 = List.from ([3, 2, 1])
 
-const copy =
-  x =>
-    List.from ([x, x])
+// const copy =
+//   x =>
+//     List.from ([x, x])
 
-const square =
-  x =>
-    x * x
+// const square =
+//   x =>
+//     x * x
 
-const negate =
-  x =>
-    -x
+// const negate =
+//   x =>
+//     -x
 
-const even =
-  x =>
-    x % 2 === 0
+// const even =
+//   x =>
+//     x % 2 === 0
 
-const list3 = List.from ([square, negate])
+// const list3 = List.from ([square, negate])
 
-console.log (list1[concat] (list2))
-console.log (list1[chain] (copy))
-console.log (list3[ap] (list1))
-console.log (List[_of] ('hello'))
-console.log (list1[filter] (even))
+// console.log (list1[concat] (list2))
+// console.log (list1[chain] (copy))
+// console.log (list3[ap] (list1))
+// console.log (List[_of] ('hello'))
+// console.log (list1[filter] (even))
 
 module.exports = {
-  Cons, // the (polymorphic) data constructor
-  Nil, // the (polymorphic) data constructor
-  $List, // the type (representative)
+  Cons, // the (polymorphic) data constructor :: a -> List a -> List a
+  Nil, // the (polymorphic) data constructor :: List a
+  List, // the type representative
+  $List, // the type
 }

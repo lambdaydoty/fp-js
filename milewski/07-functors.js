@@ -1,5 +1,5 @@
 /* eslint func-call-spacing: ["error", "always"] */
-const { Z, type, show, daggy, $, def, uncurry, S } = require ('../sanc')
+const { Z, type, show, daggy, $, uncurry, S } = require ('../sanctuary')
 const R = require ('ramda')
 
 ;(function TypeClass () {

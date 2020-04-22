@@ -29,6 +29,7 @@
     "ramda-fantasy": "^0.8.0",
     "sanctuary": "^3.0.0",
     "sanctuary-def": "^0.21.1",
+    "sanctuary-identity": "^2.1.0",
     "sanctuary-type-classes": "^12.1.0",
     "sanctuary-type-identifiers": "^3.0.0"
   },
