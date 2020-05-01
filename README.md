@@ -22,8 +22,8 @@
    * [daggy](https://github.com/fantasyland/daggy) (`daggy`)
 4. Others
    * [lazy-infinite](https://github.com/francisrstokes/Lazy-Infinite-List)
-   
+
 ## Misc.
 
 * [FantasyLand Cheatsheet](https://delapouite.com/ramblings/fantasy-land-cheat-sheet.html)
-* [Avaq Intro. Fluture]https://dev.to/avaq/fluture-a-functional-alternative-to-promises-21b
+* [Avaq Intro. Fluture](https://dev.to/avaq/fluture-a-functional-alternative-to-promises-21b)

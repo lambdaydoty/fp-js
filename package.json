@@ -31,7 +31,8 @@
     "sanctuary-def": "^0.21.1",
     "sanctuary-identity": "^2.1.0",
     "sanctuary-type-classes": "^12.1.0",
-    "sanctuary-type-identifiers": "^3.0.0"
+    "sanctuary-type-identifiers": "^3.0.0",
+    "spago": "^0.15.2"
   },
   "devDependencies": {
     "eslint-plugin-better": "^0.1.5",

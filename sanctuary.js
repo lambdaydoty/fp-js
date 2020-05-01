@@ -8,31 +8,36 @@ const show = require ('sanctuary-show')
 const type = require ('sanctuary-type-identifiers')
 const daggy = require ('daggy')
 
-const env = [
+const env0 = [
   ...S.env,
   ...F$.env,
 ]
 
 // :: a -> Maybe b -> Future a b
-const maybeToFuture = a => S.maybe (F.reject (a)) (F.resolve)
+const maybeToFuture =
+  a =>
+    S.maybe (F.reject (a)) (F.resolve)
 
 // :: Etiher a b -> Future a b
-const eitherToFuture = S.either (F.reject) (F.resolve)
+const eitherToFuture =
+  S.either (F.reject) (F.resolve)
 
-module.exports = {
-  Z,
-  $,
-  F,
-  F$,
-  S: S.create ({ checkTypes: true, env }),
-  def: $.create ({ checkTypes: true, env }),
-  _S: S.create ({ checkTypes: false, env }),
-  show,
-  type,
-  daggy,
-  ...require ('./curry'),
-  ...{
-    maybeToFuture,
-    eitherToFuture,
-  },
-}
+module.exports =
+  (env = [/* types */]) =>
+    ({
+      Z,
+      $,
+      F,
+      F$,
+      S: S.create ({ checkTypes: true, env: [ ...env, ...env0 ] }),
+      def: $.create ({ checkTypes: true, env: [ ...env, ...env0 ] }),
+      _S: S.create ({ checkTypes: false, env: [ ...env, ...env0 ] }),
+      show,
+      type,
+      daggy,
+      ...{
+        maybeToFuture,
+        eitherToFuture,
+      },
+      ...require ('./curry'),
+    })
