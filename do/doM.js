@@ -5,12 +5,13 @@ const { S } = require ('../sanctuary') ()
 
 const doM =
   g =>
-    x => {
+    m => {
       const log = () => {} // debug
-      const gen = g (x)
-      const next = x => gen.next (x) // :: a -> m b
+
+      const gen = g (m)
+      const next = m => gen.next (m) // :: a -> m b
       let result = null
-      // log (x)
+
       try {
         for (
           result = next ();
@@ -22,6 +23,29 @@ const doM =
         return result
       }
       return result.value
+    }
+
+doM.G =
+  g =>
+    m => {
+      const recur =
+        val =>
+          state => {
+            const log = () => {} // debug
+
+            const doing = g (m)
+
+            log ('*replay-start*')
+            state.forEach (it => log ({ it }) || doing.next (it)) // replay
+            log ('*replay-end*')
+
+            const result = doing.next (val)
+
+            return log ({ result }) || result.done
+              ? result.value
+              : S.unchecked.chain (v => recur (v) ([...state, val])) (result.value)
+          }
+      return recur (null) ([])
     }
 
 module.exports = doM

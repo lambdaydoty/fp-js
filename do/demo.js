@@ -116,3 +116,33 @@ const { $, S, def, uncurry } = require ('../sanctuary') ()
     ...S.unchecked.chain (copy) (ten ()),
   ])
 }) ()
+
+;(() => {
+  console.log ('')
+
+  require ('./generator')
+
+  const g1 = function * () {
+    yield 1
+    yield 2
+  }
+
+  const g2 = function * (x) {
+    yield x + 1
+    yield x + 2
+  }
+
+  const app2 = doM.G (function * (m) {
+    const x = yield m ()
+    const c = yield g1 ()
+    const d = yield g2 (c)
+    return [x, d]
+  })
+
+  const minusOne = function * () {
+    yield -1
+  }
+
+  console.log ('Non-deterministic:')
+  console.log ([...app2 (minusOne)])
+}) ()
