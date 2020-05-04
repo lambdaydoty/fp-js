@@ -122,27 +122,103 @@ const { $, S, def, uncurry } = require ('../sanctuary') ()
 
   require ('./generator')
 
-  const g1 = function * () {
-    yield 1
-    yield 2
+  const fromArray = function * (arr) {
+    yield * arr
   }
 
-  const g2 = function * (x) {
-    yield x + 1
-    yield x + 2
-  }
-
-  const app2 = doM.G (function * (m) {
-    const x = yield m ()
-    const c = yield g1 ()
-    const d = yield g2 (c)
+  const app = doM.G (function * (m) {
+    const x = yield m
+    const c = yield fromArray ([1, 2])
+    const d = yield fromArray ([c + 1, c + 2])
     return [x, d]
   })
 
-  const minusOne = function * () {
-    yield -1
-  }
+  const minusOne = fromArray ([-1])
 
   console.log ('Non-deterministic:')
-  console.log ([...app2 (minusOne)])
+  console.log ([...app (minusOne)])
+
+  const app2 = doM.G (function * (m) {
+    const c = yield 'ABC'.split ('')
+    const d = yield '12'.split ('')
+    return [c, d]
+  })
+
+  console.log ([...app2 ()])
+}) ()
+
+;(() => {
+  console.log ('')
+
+  console.log ('Curried continuation passing style & Monad')
+
+  // :: Number -> (Number -> ⊥) -> ⊥
+  const cpsSquare =
+    x =>
+      k =>
+        k (x * x)
+
+  cpsSquare (3) (x =>
+    cpsSquare (x) (y =>
+      cpsSquare (y) (z =>
+        console.log (`cpsSquare (3) ... = ${z}`))))
+
+  console.log ('')
+  console.log ('Continuation Monad: M a = (a -> m) -> m')
+  console.log ('return :: a -> M a')
+  console.log ('join :: M (M a) -> M a')
+
+  // :: a -> M a
+  // :: a -> (a -> m) -> m
+  const ret =
+    a =>
+      k =>
+        k (a)
+
+  // console.log ('')
+  // console.log ('ret 9:')
+  // ret (9) (console.log)
+
+  // :: M a -> (a -> M b) -> M b
+  // where M x = (x -> m) -> m
+  const bind =
+    k => // :: (a -> m) -> m
+      fn => // :: a -> (b -> m) -> m
+        cb => // :: (b -> m)
+          k (a => fn (a) (cb)) // :: m
+
+  // :: (a -> M b) -> M a -> (M b)
+  const chain = S.unchecked.flip (bind)
+
+  console.log ('')
+  console.log ('bind:')
+  bind (
+    bind (
+      bind (
+        ret (3)
+      ) (cpsSquare)
+    ) (cpsSquare)
+  ) (cpsSquare) (console.log)
+
+  console.log ('')
+  console.log ('chain:')
+
+  S.unchecked.pipe ([
+    chain (cpsSquare), // (a -> M b) -> M a -> M b
+    chain (cpsSquare),
+    chain (cpsSquare),
+  ]) (ret (3)) (console.log)
+
+  // yield :: M b -> b
+  const app = doM.K (function * () {
+    const x = yield ret (3)
+    const y = yield cpsSquare (x)
+    const z = yield cpsSquare (y)
+    const u = yield cpsSquare (z)
+    return ret (`${u}`)
+  }) // :: a -> (b -> m) -> m
+
+  console.log ('')
+  console.log ('do:')
+  app () (x => console.log (x))
 }) ()
