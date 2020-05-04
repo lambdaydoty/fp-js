@@ -67,27 +67,30 @@ doM.K =
             cb => // :: (b -> m)
               k (a => log ({ a, fn, cb }) || fn (a) (cb))
 
+      // :: a -> M a
+      // :: a -> (a -> m) -> m
+      // = T combinator
+      const ret =
+        a =>
+          k =>
+            k (a)
+
       const gen = g (m)
       const next = m => gen.next (m) // :: a -> { value: (m b), done }
 
-      const recur =
+      const Next =
         val => {
           const result = next (val)
-
-          log ({ result })
-
-          if (result.done) return result.value
-
-          return bind (result.value) (r => {
-            // FIXME: workaround
-            const result = next (r)
-            return result.done
-              ? _ => result.value
-              : result.value
-          }) (recur)
+          return result.done
+            ? _ => result.value
+            : ret (result.value) // for recur to call
         }
 
-      return recur (null)
+      const recur =
+        k =>
+          bind (k) (Next) (recur)
+
+      return recur (ret (null))
     }
 
 module.exports = doM
