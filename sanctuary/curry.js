@@ -1,14 +1,16 @@
 /* eslint func-call-spacing: ["error", "always"] */
-const I = x => x
+
+/* common combinators */
+// const I = x => x
 const K = x => y => x
 const S = f => g => x => f (x) (g (x))
-const A = f => x => f (x) // apply
-const T = x => f => f (x) // thrush
-const B = f => g => x => f (g (x)) // compose
-const Y = f => (g => g (g)) (g => f (x => g (g) (x))) // applicative Y combinator
-
+// const A = f => x => f (x) // apply
+// const T = x => f => f (x) // thrush
+// const B = f => g => x => f (g (x)) // compose
+// const Y = f => (g => g (g)) (g => f (x => g (g) (x))) // applicative Y
 const tap = S (K) // :: g -> a -> a
 
+/* curry and uncurry */
 const uncurry =
   fn =>
     (...args) =>
@@ -33,6 +35,10 @@ const apply =
     ar =>
       f (...ar)
 
+const isNil =
+  x =>
+    x == null
+
 const trampoline =
   fn =>
     (...args) => {
@@ -44,41 +50,6 @@ const trampoline =
       );
       return res
     }
-
-const Counter =
-  function * (
-    start = 0,
-    end = Number.MAX_SAFE_INTEGER
-  ) {
-    for (
-      let i = start;
-      i < end;
-      ++i
-    ) yield i
-    return null
-  }
-
-const isNil =
-  x =>
-    x == null
-
-const chain =
-  fn =>
-    ar =>
-      ar.reduce (
-        (acc, x) => acc.concat (fn (x)),
-        [],
-      )
-
-// :: Number -> (Unit -> a) -> [a]
-const repeat =
-  n =>
-    f =>
-      [
-        ...(function * () {
-          while (n--) { yield f () }
-        }) (),
-      ]
 
 // :: (a -> String) -> (a -> b) -> a -> b
 const memoize =
@@ -95,23 +66,12 @@ const memoize =
     }
 
 module.exports = {
-  I,
-  K,
-  // S,
-  A,
-  T,
-  B,
-  Y,
   tap,
-  tee: tap,
-  curry,
   uncurry,
-  chain,
-  trampoline,
-  thunk: K,
-  Counter,
-  isNil,
-  repeat,
-  memoize,
+  curryN,
+  curry,
   apply,
+  isNil,
+  trampoline,
+  memoize,
 }

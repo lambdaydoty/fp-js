@@ -1,114 +1,132 @@
-const R = require('ramda')
-const { type, daggy, show, S, $, uncurry, def, K } = require('../sanc')
+/* eslint func-call-spacing: ["error", "always"] */
+/* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
+const { daggy, show, S, $, uncurry, def } = require ('../sanctuary') ()
 
-const x = 3
+/* 2.3 What Are Types */
 
-console.log(
-  S.is($.Integer)(x)
-)
+// The bottom type
 
-// Void type
+const f =
+  () => {
+    throw new Error ()
+  }
 
-const absurd = uncurry(def)(
+try {
+  f ()
+} catch (e) {
+  console.log ('')
+  console.log ('f (): catched!')
+}
+
+/* 2.6 Examples of Types */
+
+// ∷ Void → Any
+const absurd = uncurry (def) (
   'absurd',
   {},
-  [$.Void, $.Any],
+  [$.Void, $.TypeVariable ('a')],
   _ => _,
 )
 
-console.log(
-  R.tryCatch(absurd, K('catched'))(1)
-)
+try {
+  absurd (null)
+} catch (e) {
+  console.log ('')
+  console.log ('absord (null): catched!')
+  // console.log (e)
+}
 
-// C++ function of input type `void`
-
-const f44 = uncurry(def)(
+// ∷ Unit → Number
+const f44 = uncurry (def) (
   'f44',
   {},
   [$.Null, $.Integer],
   _ => 44,
 )
 
-console.log(f44(null))
+console.log ('')
+console.log (`f44 (null) === ${f44 (null)}`)
 
-// C++ function of output type `void`
-
-const fInt = uncurry(def)(
+// ∷ Number → Unit
+const fInt = uncurry (def) (
   'fInt',
   {},
   [$.Integer, $.Undefined],
   _ => {},
 )
 
-console.log(fInt(3))
+console.log ('')
+console.log (`fIn4 (3) === ${fInt (3)}`)
 
 // ps. In sanctuary.js we could emulate Void type by $.Null or $.Undefined
 //     If needed, we could also explicitly define a new Void type:
 
-const $Unit = uncurry($.NullaryType)(
+const Unit = daggy.tagged ('Unit', [])
+const $Unit = uncurry ($.NullaryType) (
   'Unit',
   'http://',
-  [$.Null],
-  _ => true,
+  [],
+  x => x instanceof Unit,
 )
 
-console.log(show($Unit))
+Unit.prototype['@@show'] = () => '()'
 
-// unit function
-const unit = uncurry(def)(
+console.log ('')
+console.log (`show ($Unit) === ${show ($Unit)}`)
+
+// The unit function
+// ∷ a → Unit
+const unit = uncurry (def) (
   'unit',
   {},
-  [$.Any, $.Undefined],
-  _ => {},
+  [$.TypeVariable ('a'), $Unit],
+  _ => new Unit (),
 )
 
-console.log(unit(1))
+console.log ('')
+console.log (`unit (12345) === ${show (unit (12345))}`)
+console.log (`unit ('foo') === ${show (unit ('foo'))}`)
 
 // Bool type
 
-const typeBool = 'jws/Bool'
-
-/* daggy demo */
-
-// Bool :: Type Representative
-const Bool = daggy.taggedSum(
-  typeBool, // :: typeName
-  {
-    True: [], // :: Constructor
-    False: [], // :: Constructor
-  },
-)
+// The type constructors
+const Bool = daggy.taggedSum ('Bool', {
+  True: [],
+  False: [],
+})
 
 const { True, False } = Bool
 
-console.log('Bool.is(True)?', `${Bool.is(True)}`)
-console.log('Bool.is(False)?', `${Bool.is(False)}`)
-console.log('Bool.True.is(True)?', `${Bool.True.is(True)}`)
-console.log('Bool.True.is(False)?', `${Bool.True.is(False)}`)
-console.log('Bool.False.is(True)?', `${Bool.False.is(True)}`)
-console.log('Bool.False.is(False)?', `${Bool.False.is(False)}`)
-
-True['@@type'] = typeBool
-False['@@type'] = typeBool
-
-const $Bool = uncurry($.NullaryType)(
-  typeBool,
-  'http://',
-  [],
-  x => type(x) === typeBool,
-)
-
-console.log(type(False))
-console.log(show(False))
-console.log(False)
-console.log(S.is($Bool)(True))
-
-Bool.prototype.invert = function () {
-  return this.cata({
-    True: () => False,
-    False: () => True,
+Bool.prototype['@@show'] = function () {
+  return this.cata ({
+    True: _ => 'true',
+    False: _ => 'false',
   })
 }
 
-console.log('True.invert()', `${True.invert()}`)
-console.log('False.invert()', `${False.invert()}`)
+// The type representative
+const $Bool = uncurry ($.NullaryType) (
+  'Bool',
+  'http://',
+  [],
+  x => Bool.is (x),
+)
+
+console.log ('')
+console.log (`S.is ($Bool) (True) === ${S.is ($Bool) (True)}`)
+console.log (`S.is ($Bool) (False) === ${S.is ($Bool) (False)}`)
+
+// ∷ Bool → Bool
+const not = uncurry (def) (
+  'not',
+  {},
+  [$Bool, $Bool],
+  x => x.cata ({
+    True: _ => False,
+    False: _ => True,
+  }),
+)
+
+console.log ('')
+console.log (`not (True) === ${show (not (True))}`)
+console.log (`not (False) === ${show (not (False))}`)
