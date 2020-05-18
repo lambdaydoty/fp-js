@@ -65,6 +65,7 @@ module.exports =
   }
 
 /* example */
+
 // ∷ Number → Number
 // const inc = uncurry (def) (
 //   'inc',
@@ -72,6 +73,12 @@ module.exports =
 //   [$.Number, $.Number],
 //   x => x + 1,
 // )
+
+// $prototype = {
+//   [require ('util').inspect.custom]: function () {
+//     return show (this)
+//   },
+// }
 
 /*
  * eslint func-call-spacing fixer for vim:
