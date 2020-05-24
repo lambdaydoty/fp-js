@@ -1,16 +1,23 @@
 /* eslint func-call-spacing: ["error", "always"] */
 
 /* common combinators */
-// const I = x => x
-const K = x => y => x
-const S = f => g => x => f (x) (g (x))
-// const A = f => x => f (x) // apply
+
+// const I = x => x // id
+const K = x => y => x // const
+// const A = f => x => f (x) // apply*
 // const T = x => f => f (x) // thrush
-// const B = f => g => x => f (g (x)) // compose
-// const Y = f => (g => g (g)) (g => f (x => g (g) (x))) // applicative Y
-const tap = S (K) // :: g -> a -> a
+// const W = f => x => f(x)(x) // join
+// const C = f => y => x => f(x)(y) // flip
+// const B = f => g => x => f(g(x)) // compose
+const S = f => g => x => f (x) (g (x)) // ap
+// const P = f => g => x => y => f(g(x))(g(y)) // on
+// const Y = f => (g => g(g))(g => f(x => g(g)(x))) // fix
+
+// ∷ g → a → a
+const tap = S (K)
 
 /* curry and uncurry */
+
 const uncurry =
   fn =>
     (...args) =>
@@ -44,22 +51,22 @@ const trampoline =
     (...args) => {
       let res = null
       for (
-        res = fn (...args);
+        res = apply (fn) (args);
         typeof res === 'function';
         res = res () /* ! */
       );
       return res
     }
 
-// :: (a -> String) -> (a -> b) -> a -> b
+// ∷ (a → String) → (a → b) → a → b
 const memoize =
   (key = x => x) =>
     f => {
       const table = {}
       return (...args) => {
-        const k = key (...args)
+        const k = apply (key) (args)
         if (table[k] === undefined) {
-          table[k] = f (...args)
+          table[k] = apply (f) (args)
         }
         return table[k]
       }

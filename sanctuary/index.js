@@ -9,9 +9,13 @@ const show = require ('sanctuary-show')
 const type = require ('sanctuary-type-identifiers')
 const daggy = require ('daggy')
 
+const types = require ('./types')
+
 const env0 = [
   ...S_.env,
   ...F$.env,
+  types.$Unit,
+  types.$List ($.Unknown),
 ]
 
 const { uncurry } = require ('./curry')
@@ -20,13 +24,32 @@ const { uncurry } = require ('./curry')
  * Some helper functions to extend Sanctuary
  */
 const extend =
-  s => ({
-    // ∷ a → Maybe b → Future a b
-    maybeToFuture: a => s.maybe (F.reject (a)) (F.resolve),
+  s => {
+    const maybeToFuture = a => s.maybe (F.reject (a)) (F.resolve)
 
-    // ∷ Etiher a b → Future a b
-    eitherToFuture: s.either (F.reject) (F.resolve),
-  })
+    const eitherToFuture = s.either (F.reject) (F.resolve)
+
+    const repeat =
+      x =>
+        n =>
+          s.unfoldr (i => i < n ? s.Just (s.Pair (x) (i + 1)) : s.Nothing) (0)
+
+    const B = s.compose
+
+    const pick =
+      s.pipe ([
+        s.ap (s.zip) (B (repeat (s.I)) (s.size)), // ∷ Pair string (a → a)
+        s.fromPairs,                              // ∷ strMap (a → a)
+        s.ap,                                     // ∷ (strMap a) → (strMap a)
+      ])
+
+    return {
+      maybeToFuture,   // ∷ a → Maybe b → Future a b
+      eitherToFuture,  // ∷ Etiher a b → Future a b
+      repeat,          // ∷ a → Integer → [a]
+      pick,            // ∷ [String] → (StrMap a) → (StrMap a)
+    }
+  }
 
 /*
  * Uncurry defining functions in $ for convenience
@@ -61,6 +84,7 @@ module.exports =
       ...{ Z, $, F, F$, S, E },
       ...{ D, def, show, type },
       ...require ('./curry'),
+      ...require ('./types'),
     }
   }
 

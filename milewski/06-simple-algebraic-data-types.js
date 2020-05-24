@@ -1,25 +1,46 @@
 /* eslint func-call-spacing: ["error", "always"] */
-const { type, show, daggy, $, def, uncurry, S } = require ('../sanc')
+/* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
+const { List, Unit, $Unit, type, show, daggy, $, D, S } = require ('../sanctuary') ()
+
+const show2 =
+  a => type (a) === 'sanctuary-pair/Pair@1'
+    ? S.pair (
+      x =>
+        y =>
+          `(${show2 (x)},${show2 (y)})`
+    ) (a) : show (a)
 
 ;(function ProductTypes () {
-  const p = S.Pair ('foo') (1)
-  console.log ('ProductTypes')
-  console.log (p)
-  console.log (S.swap (p))
   console.log ('')
+  console.log ('@ProductTypes')
+
+  const p = S.Pair ('foo') (1)
+
+  console.log (`
+    S.swap ${show2 (p)} === ` + show2 (
+    S.swap (p)
+  ))
 }) ()
 
 ;(function Isomorphic () {
+  console.log ('')
+  console.log ('@Isomorphic')
+
   const a = $.TypeVariable ('a')
   const b = $.TypeVariable ('b')
   const c = $.TypeVariable ('c')
-  const $Tripple1 = $.Pair ($.Pair (a) (b)) (c)
-  const $Tripple2 = $.Pair (a) ($.Pair (b) (c))
 
-  const alpha = uncurry (def) (
+  const $Triple1 = $.Pair ($.Pair (a) (b)) (c)
+  const $Triple2 = $.Pair (a) ($.Pair (b) (c))
+
+  const Triple1 = a => S.Pair (S.Pair (a[0]) (a[1])) (a[2])
+  const Triple2 = a => S.Pair (a[0]) (S.Pair (a[1]) (a[2]))
+
+  // ∷ ((a, b), c) → (a, (b, c))
+  const alpha = D.def (
     'alpha',
     {},
-    [$Tripple1, $Tripple2],
+    [$Triple1, $Triple2],
     S.pair (
       p =>
         z =>
@@ -31,10 +52,11 @@ const { type, show, daggy, $, def, uncurry, S } = require ('../sanc')
     )
   )
 
-  const alphaInv = uncurry (def) (
+  // ∷ (a, (b, c)) → ((a, b), c)
+  const alphaInv = D.def (
     'alphaInv',
     {},
-    [$Tripple2, $Tripple1],
+    [$Triple2, $Triple1],
     S.pair (
       x =>
         S.pair (
@@ -46,81 +68,133 @@ const { type, show, daggy, $, def, uncurry, S } = require ('../sanc')
     ),
   )
 
-  const t1 = S.Pair (S.Pair ('foo') (1)) (true) // (('foo', 1), true)
+  const t1 = Triple1 (['foo', 1, true])
+  const t2 = Triple2 (['foo', 1, true])
 
-  console.log ('Isomorphic: ( (a, b), c) ~= (a, (b, c))')
-  console.log (t1)
-  console.log (alpha (t1))
-  console.log (alphaInv (alpha (t1)))
   console.log ('')
+  console.log (`
+    S.equals (alpha ${show2 (t1)}) ${show2 (t2)} === ` +
+    S.equals (alpha (t1)) (t2)
+  )
+  console.log (`
+    S.equals ${show2 (t1)} (alphaInv ${show2 (t2)}) === ` +
+    S.equals (t1) (alphaInv (t2))
+  )
 
-  const rho = uncurry (def) (
+  // ∷ Pair a Unit → a
+  const rho = D.def (
     'rho',
     {},
-    [$.Pair (a) ($.Undefined), a],
+    [$.Pair (a) ($Unit), a],
     S.pair (
       x =>
-        y =>
+        _ =>
           x
     ),
   )
 
-  const rhoInv = uncurry (def) (
+  // ∷ a → Pair a Unit
+  const rhoInv = D.def (
     'rhoInv',
     {},
-    [a, $.Pair (a) ($.Undefined)],
-    x => S.Pair (x) (undefined),
+    [a, $.Pair (a) ($Unit)],
+    x => S.Pair (x) (Unit ()),
   )
 
-  const val = S.Pair ('foo') (undefined)
+  const v1 = S.Pair ('foo') (Unit ())
+  const v2 = 'foo'
 
-  console.log ('Isomorphic: (a, ()) ~= a')
-  console.log (val)
-  console.log (rho (val))
-  console.log (rhoInv (rho (val)))
   console.log ('')
+  console.log (`
+    rho ${show2 (v1)} === ${show2 (rho (v1))}`)
+  console.log (`
+    rhoInv (${show2 (v2)}) === ${show2 (rhoInv (v2))}`)
 }) ()
 
-;(function () {
-  // S.Pair () () ... the data constructur
-  // $.Pair ... the (binary) type constructor
-
-  const stmt = S.Pair ('This statement is') (false)
-  const type = $.Pair ($.String) ($.Boolean)
-
-  console.log ('Data Constructor vs. Type Constructor')
-  console.log (stmt)
-  console.log (S.is (type) (stmt))
+;(function TypeConstructorDataConstructor () {
   console.log ('')
+  console.log ('@TypeConstructorDataConstructor')
+
+  // S.Pair ... the data constructur
+  // $.Pair ... the type constructor
+
+  console.log (`
+    The type constructor:
+    $.Pair ($.String) ($.Boolean) === ` + show (
+    $.Pair ($.String) ($.Boolean)
+  ))
+  console.log (`
+    The data constructor:
+    S.Pair ('This statement is') (true) === ` + show (
+    S.Pair ('This statement is') (true)
+  ))
 }) ()
 
 ;(function Records () {
-  const $Tripple = $.Pair ($.String) ($.Pair ($.String) ($.Integer))
+  console.log ('')
+  console.log ('@Records')
 
-  const Tripple =
+  const $Triple =
+    $.Pair ($.String) (
+      $.Pair ($.String) (
+        $.Pair ($.Integer) ($Unit)))
+
+  // ∷ String → String → Integer -> Triple
+  const Triple = D.def (
+    'Triple',
+    {},
+    [$.String, $.String, $.Integer, $Triple],
     x =>
       y =>
         z =>
-          S.Pair (x) (S.Pair (y) (z))
-
-  const startsWithSymbol = uncurry (def) (
-    'startsWithSymbol',
-    {},
-    [$Tripple, $.Boolean],
-    S.pair (
-      name =>
-        S.pair (
-          symbol =>
-            _ =>
-              new RegExp (`^${symbol}`)
-                .test (name)
-        )
-    )
+          S.Pair (x) (
+            S.Pair (y) (
+              S.Pair (z) (Unit ())))
   )
 
-  const he = Tripple ('Helium') ('He') (2)
-  console.log ('Records')
-  console.log (he, startsWithSymbol (he))
+  // ∷ (a → b → c → d) -> Triple a b c → d
+  const a = $.TypeVariable ('a')
+  const b = $.TypeVariable ('b')
+  const c = $.TypeVariable ('c')
+  const d = $.TypeVariable ('d')
+  const triple = D.def (
+    'triple',
+    {},
+    [$.Fn (a) (
+      $.Fn (b) (
+        $.Fn (c) (d))), $Triple, d],
+    fn =>
+      S.pair (
+        x =>
+          S.pair (
+            y =>
+              S.pair (
+                z =>
+                  _ =>
+                    fn (x) (y) (z))))
+  )
+
+  // ∷ Triple → Boolean
+  const startsWithSymbol = D.def (
+    'startsWithSymbol',
+    {},
+    [$Triple, $.Boolean],
+    triple (
+      name =>
+        symbol =>
+          _ =>
+            S.test (new RegExp (`^${symbol}`)) (name))
+  )
+
+  const he = Triple ('Helium') ('He') (2)
+
+  console.log ('')
+  console.log (`
+    he === ${show2 (he)}`
+  )
+  console.log (`
+    startsWithSymbol (he) === ${startsWithSymbol (he)}`
+  )
 
   const Element = daggy.tagged ('Element', [
     'name',
@@ -128,40 +202,36 @@ const { type, show, daggy, $, def, uncurry, S } = require ('../sanc')
     'atomicNumber',
   ])
 
-  const $Element = uncurry ($.NullaryType) (
-    'Element',
-    'http://',
-    [],
-    ({ name, symbol, atomicNumber }) =>
-      S.is ($.String) (name) &&
-      S.is ($.String) (symbol) &&
-      S.is ($.Integer) (atomicNumber),
-  )
+  const $Element = $.RecordType ({
+    name: $.String,
+    symbol: $.String,
+    atomicNumber: $.Integer,
+  })
 
-  const def2 = $.create ({ checkTypes: true, env: $.env.concat ([$Element]) })
+  const _ = require ('../sanctuary') ([$Element])
 
-  const trippleToElement = uncurry (def2) (
-    'trippleToElement',
+  // ∷ Triple → Element
+  const tripleToElement = _.D.def (
+    'tripleToElement',
     {},
-    [$Tripple, $Element],
-    S.pair (
+    [$Triple, $Element],
+    triple (
       name =>
-        S.pair (
-          symbol =>
-            atomicNumber =>
-              Element.from ({ name, symbol, atomicNumber })
-        )
-    )
+        symbol =>
+          atomicNumber =>
+            Element.from ({ name, symbol, atomicNumber }))
   )
 
-  console.log (trippleToElement (he))
-
-  const elementToTripple = uncurry (def2) (
-    'elementToTripple',
+  // ∷ Element → Triple
+  const elementToTriple = _.D.def (
+    'elementToTriple',
     {},
-    [$Element, $Tripple],
-    ({ name, symbol, atomicNumber }) =>
-      Tripple (name) (symbol) (atomicNumber),
+    [$Element, $Triple],
+    ({
+      name,
+      symbol,
+      atomicNumber,
+    }) => Triple (name) (symbol) (atomicNumber),
   )
 
   const h = Element.from ({
@@ -170,146 +240,70 @@ const { type, show, daggy, $, def, uncurry, S } = require ('../sanc')
     atomicNumber: 1,
   })
 
-  console.log (elementToTripple (h))
-
-  const startsWithSymbol2 = uncurry (def) (
-    'startsWithSymbol2',
-    {},
-    [$Element, $.Boolean],
-    ({ name, symbol }) =>
-      new RegExp (`^${symbol}`)
-        .test (name)
-  )
-
-  console.log (h, startsWithSymbol2 (h))
   console.log ('')
+  console.log (`
+    tripleToElement (${show2 (he)}) === ` + show2 (
+    tripleToElement (he)
+  ))
+  console.log (`
+    elementToTriple (${show2 (h)}) === ` + show2 (
+    elementToTriple (h)
+  ))
+
+  // ∷ Element → Boolean
+  const startsWithSymbolRec = S.compose (startsWithSymbol) (elementToTriple)
+
+  console.log ('')
+  console.log (`
+    h === ${show2 (h)}`
+  )
+  console.log (`
+    startsWithSymbolRec (h) === ${startsWithSymbolRec (h)}`
+  )
 }) ()
 
 ;(function SumTypes () {
-  const OneOfThree = daggy.taggedSum (
-    'OneOfThree',
-    {
-      Sinistral: ['senistral'],
-      Mideial: ['midial'],
-      Dextral: ['dextral'],
-    },
-  )
-
-  console.log (OneOfThree)
-
-  /* List of a */
-
-  const List = daggy.taggedSum (
-    'List',
-    {
-      Cons: ['x', 'xs'],
-      Nil: [],
-    }
-  )
-
-  const { Cons, Nil } = List
-
-  const list =
-    Cons (
-      1,
-      Cons (
-        2,
-        Cons (
-          3,
-          Cons (
-            4,
-            Nil,
-          )
-        )
-      )
-    )
-
-  List.prototype.reduce = function (op, init) {
-    return this.cata ({
-      Cons: (x, xs) => op (xs.reduce (op, init), x),
-      Nil: () => init,
-    })
-  }
-
-  console.log (
-    list
-      .reduce (
-        (x, y) => x * y,
-        1,
-      )
-  )
-
-  // static
-  List.from =
-    array =>
-      array.reduceRight (
-        (xs, x) =>
-          Cons (x, xs),
-        Nil,
-      )
-
-  console.log (List.from ([4, 3, 2, 1]))
-
-  /* maybeTail */
-
-  const a = $.TypeVariable ('a')
-
-  const listIdent = 'jws/list'
-
-  List.prototype['@@type'] = listIdent
-  List.prototype['@@show'] = function () {
-    return this.cata ({
-      Cons: (x, xs) => `(${x} ${show (xs)})`,
-      Nil: () => `nil`,
-    })
-  }
-
-  const $List = uncurry ($.UnaryType) (
-    'List',
-    'http://',
-    [],
-    xs => type (xs) === listIdent,
-    xs => xs.cata ({
-      Cons: (x, xs) => [x],
-      Nil: () => [],
-    }),
-  )
-
-  const types = [
-    $List ($.Unknown),
-    $.Maybe ($List ($.Unknown)),
-  ]
-
-  const S2 = S.create ({
-    checkTypes: true,
-    env: S.env.concat (types),
-  })
-
-  const def2 = $.create ({
-    checkTypes: true,
-    env: $.env.concat (types),
-  })
-
-  const maybeTail = uncurry (def2) (
-    'maybeTail',
-    {},
-    [$List (a), $.Maybe ($List (a))],
-    xs =>
-      xs.cata ({
-        Cons: (y, ys) => S2.Just (ys),
-        Nil: () => S2.Nothing,
-      }),
-  )
-
-  const xs = List.from ('hello world!'.split (''))
-  const ys = List.from ([])
-
-  console.log (maybeTail (xs))
-  console.log (maybeTail (ys))
   console.log ('')
+  console.log ('@SumTypes')
+
+  const OneOfThree = daggy.taggedSum ('OneOfThree', {
+    Sinistral: ['value'],
+    Midial: ['value'],
+    Dextral: ['value'],
+  })
+
+  OneOfThree.prototype['@@show'] = function () {
+    return this.cata ({
+      Sinistral: x => `Sinistral (${show (x)})`,
+      Midial: x => `Midial (${show (x)})`,
+      Dextral: x => `Dextral (${show (x)})`,
+    })
+  }
+
+  const { Sinistral } = OneOfThree
+
+  console.log ('')
+  console.log (`
+    Sinistral (1) === ` + show (
+    Sinistral (1)
+  ))
+
+  /* List */
+
+  const list1 = List.from ([1, 2, 3])
+  const list2 = List.from ([])
+
+  console.log ('')
+  console.log (`
+    S.tail (${show (list1)}) === ${show (S.tail (list1))}
+    S.tail (${show (list2)}) === ${show (S.tail (list2))}
+  `)
 }) ()
 
 ;(function AlgebraOfTypes () {
+  console.log ('')
+  console.log ('AlgebraOfTypes')
+
   const a = $.TypeVariable ('a')
   const b = $.TypeVariable ('b')
   const c = $.TypeVariable ('c')
@@ -317,42 +311,33 @@ const { type, show, daggy, $, def, uncurry, S } = require ('../sanc')
   const $Prod = $.Pair (a) ($.Either (b) (c))
   const $Sum = $.Either ($.Pair (a) (b)) ($.Pair (a) (c))
 
-  const prodToSum = uncurry (def) (
+  // const B = S.compose
+
+  // ∷ (a,b|c) → (a,b)|(a,c)
+  const prodToSum = D.def (
     'prodToSum',
     {},
     [$Prod, $Sum],
-    S.pair (
-      x =>
-        S.either (
-          y => S.Left (S.Pair (x) (y))
-        ) (
-          z => S.Right (S.Pair (x) (z))
-        )
-    )
+    S.sequence (S.Either),
+    // S.pair (
+    //   x =>
+    //     S.bimap (S.Pair (x)) (S.Pair (x))
+    // ),
   )
 
-  const sumToProd = uncurry (def) (
+  // ∷  (a,b)|(a,c) → (a,b|c)
+  const sumToProd = D.def (
     'sumToProd',
     {},
     [$Sum, $Prod],
-    S.either (
-      S.pair (
-        x =>
-          y =>
-            S.Pair (x) (S.Left (y))
-      )
-    ) (
-      S.pair (
-        x =>
-          z =>
-            S.Pair (x) (S.Right (z))
-      )
-    )
+    S.either (S.map (S.Left)) (S.map (S.Right)),
   )
 
   const value = S.Pair (1) (S.Right ('foo'))
 
-  console.log (value)
-  console.log (prodToSum (value))
-  console.log (sumToProd (prodToSum (value)))
+  console.log ('')
+  console.log (`
+    prodToSum ${show (value)} === ${show (prodToSum (value))}
+    sumToProd (prodToSum) ${show (value)} === ${show (sumToProd (prodToSum (value)))}
+  `)
 }) ()

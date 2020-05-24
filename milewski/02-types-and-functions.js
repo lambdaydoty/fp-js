@@ -1,6 +1,6 @@
 /* eslint func-call-spacing: ["error", "always"] */
 /* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
-const { daggy, show, S, $, uncurry, def } = require ('../sanctuary') ()
+const { daggy, show, S, $, uncurry, D, $Unit, Unit } = require ('../sanctuary') ()
 
 /* 2.3 What Are Types */
 
@@ -21,7 +21,7 @@ try {
 /* 2.6 Examples of Types */
 
 // ∷ Void → Any
-const absurd = uncurry (def) (
+const absurd = D.def (
   'absurd',
   {},
   [$.Void, $.TypeVariable ('a')],
@@ -37,7 +37,7 @@ try {
 }
 
 // ∷ Unit → Number
-const f44 = uncurry (def) (
+const f44 = D.def (
   'f44',
   {},
   [$.Null, $.Integer],
@@ -48,7 +48,7 @@ console.log ('')
 console.log (`f44 (null) === ${f44 (null)}`)
 
 // ∷ Number → Unit
-const fInt = uncurry (def) (
+const fInt = D.def (
   'fInt',
   {},
   [$.Integer, $.Undefined],
@@ -61,26 +61,16 @@ console.log (`fIn4 (3) === ${fInt (3)}`)
 // ps. In sanctuary.js we could emulate Void type by $.Null or $.Undefined
 //     If needed, we could also explicitly define a new Void type:
 
-const Unit = daggy.tagged ('Unit', [])
-const $Unit = uncurry ($.NullaryType) (
-  'Unit',
-  'http://',
-  [],
-  x => x instanceof Unit,
-)
-
-Unit.prototype['@@show'] = () => '()'
-
 console.log ('')
 console.log (`show ($Unit) === ${show ($Unit)}`)
 
 // The unit function
 // ∷ a → Unit
-const unit = uncurry (def) (
+const unit = D.def (
   'unit',
   {},
   [$.TypeVariable ('a'), $Unit],
-  _ => new Unit (),
+  _ => Unit (),
 )
 
 console.log ('')
@@ -117,7 +107,7 @@ console.log (`S.is ($Bool) (True) === ${S.is ($Bool) (True)}`)
 console.log (`S.is ($Bool) (False) === ${S.is ($Bool) (False)}`)
 
 // ∷ Bool → Bool
-const not = uncurry (def) (
+const not = D.def (
   'not',
   {},
   [$Bool, $Bool],
