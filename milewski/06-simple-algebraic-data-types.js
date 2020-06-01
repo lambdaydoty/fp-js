@@ -319,10 +319,6 @@ const show2 =
     {},
     [$Prod, $Sum],
     S.sequence (S.Either),
-    // S.pair (
-    //   x =>
-    //     S.bimap (S.Pair (x)) (S.Pair (x))
-    // ),
   )
 
   // ∷  (a,b)|(a,c) → (a,b|c)

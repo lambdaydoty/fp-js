@@ -18,38 +18,8 @@ const env0 = [
   types.$List ($.Unknown),
 ]
 
+const extend = require ('./extend')
 const { uncurry } = require ('./curry')
-
-/*
- * Some helper functions to extend Sanctuary
- */
-const extend =
-  s => {
-    const maybeToFuture = a => s.maybe (F.reject (a)) (F.resolve)
-
-    const eitherToFuture = s.either (F.reject) (F.resolve)
-
-    const repeat =
-      x =>
-        n =>
-          s.unfoldr (i => i < n ? s.Just (s.Pair (x) (i + 1)) : s.Nothing) (0)
-
-    const B = s.compose
-
-    const pick =
-      s.pipe ([
-        s.ap (s.zip) (B (repeat (s.I)) (s.size)), // ∷ Pair string (a → a)
-        s.fromPairs,                              // ∷ strMap (a → a)
-        s.ap,                                     // ∷ (strMap a) → (strMap a)
-      ])
-
-    return {
-      maybeToFuture,   // ∷ a → Maybe b → Future a b
-      eitherToFuture,  // ∷ Etiher a b → Future a b
-      repeat,          // ∷ a → Integer → [a]
-      pick,            // ∷ [String] → (StrMap a) → (StrMap a)
-    }
-  }
 
 /*
  * Uncurry defining functions in $ for convenience
@@ -65,6 +35,7 @@ const uncurrys =
       'NullaryType',
       'UnaryType',
       'BinaryType',
+      'EnumType',
       'RecordType',
       'NamedRecordType',
     ])
@@ -73,11 +44,9 @@ module.exports =
   (env = [/* types */]) => {
     const S = S_.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
     const def = $.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
-
+    const D = uncurrys (def)
     const E = extend (S)
     E.unchecked = extend (S.unchecked)
-
-    const D = uncurrys (def)
 
     return {
       daggy,

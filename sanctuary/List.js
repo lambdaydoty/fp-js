@@ -6,7 +6,7 @@ const daggy = require ('daggy')
 const $ = require ('sanctuary-def')
 const util = require ('util')
 const { uncurry } = require ('./curry')
-const FL = require ('fantasy-land')
+const { map, filter, reduce, concat, chain, ap, of: of_, empty } = require ('fantasy-land')
 const a = $.TypeVariable ('a')
 
 const listIdentifier = 'jws/list/1'
@@ -25,7 +25,7 @@ const $List = uncurry ($.UnaryType) (
   xs => List.is (xs),
   xs => xs.cata ({
     Cons: (x, xs) => [x],
-    Nil: () => [],
+    Nil: _ => [],
   }),
 )
 
@@ -54,70 +54,70 @@ const $prototype = {
   '@@show' () {
     return this.cata ({
       Cons: (x, xs) => `(${x} ${show (xs)})`,
-      Nil: () => `()`,
+      Nil: _ => `()`,
     })
   },
   [util.inspect.custom] () {
     return show (this)
   },
 
-  // ∷ Foldable f => f a ~> ((b, a) → b, b) → b
-  [FL.reduce] (op, init) {
+  // ∷ Foldable f ⇒ f a ~> ((b, a) → b, b) → b
+  [reduce] (op, init) {
     return this.cata ({
-      Cons: (x, xs) => xs[FL.reduce] (op, op (init, x)),
+      Cons: (x, xs) => op (xs[reduce] (op, init), x),
       Nil: _ => init,
     })
   },
 
-  // ∷ Functor f => f a ~> (a → b) → f b
-  [FL.map] (fn) {
-    return this[FL.reduce] (
+  // ∷ Functor f ⇒ f a ~> (a → b) → f b
+  [map] (fn) {
+    return this[reduce] (
       (xs, x) => Cons (fn (x)) (xs),
       Nil,
     )
   },
 
-  // ∷ Filterable f => f a ~> (a → Boolean) → f a
-  [FL.filter] (pred) {
-    return this[FL.reduce] (
+  // ∷ Filterable f ⇒ f a ~> (a → Boolean) → f a
+  [filter] (pred) {
+    return this[reduce] (
       (xs, x) =>
         pred (x) ? Cons (x) (xs) : xs,
       Nil,
     )
   },
 
-  // ∷ Semigroup a => a ~> a → a
-  [FL.concat] (that) {
-    return this[FL.reduce] (
+  // ∷ Semigroup a ⇒ a ~> a → a
+  [concat] (that) {
+    return this[reduce] (
       (xs, x) => Cons (x) (xs),
       that,
     )
   },
 
-  // ∷ Chain m => m a ~> (a → m b) → m b
-  [FL.chain] (fn) {
-    return this[FL.map] (fn)[FL.reduce] (
-      (xs, ys) => ys[FL.concat] (xs),
-      List[FL.empty] (),
+  // ∷ Chain m ⇒ m a ~> (a → m b) → m b
+  [chain] (fn) {
+    return this[map] (fn)[reduce] (
+      (xs, ys) => ys[concat] (xs),
+      List[empty] (),
     )
   },
 
-  // ∷ Apply f => f a ~> f (a → b) → f b
-  [FL.ap] (that) {
-    return this[FL.chain] (
-      f => that[FL.map] (f)
+  // ∷ Apply f ⇒ f a ~> f (a → b) → f b
+  [ap] (that) {
+    return this[chain] (
+      f => that[map] (f)
     )
   },
 }
 
 const $static = {
-  // ∷ Monoid m => () → m
-  [FL.empty] () {
+  // ∷ Monoid m ⇒ () → m
+  [empty] () {
     return Nil
   },
 
-  // ∷ Applicative f => a → f a
-  [FL.of] (x) {
+  // ∷ Applicative f ⇒ a → f a
+  [of_] (x) {
     return Cons (x) (Nil)
   },
 
