@@ -5,7 +5,7 @@ const show = require ('sanctuary-show')
 const daggy = require ('daggy')
 const $ = require ('sanctuary-def')
 const util = require ('util')
-const { uncurry } = require ('./curry')
+const { uncurry } = require ('../curry')
 const { map, filter, reduce, concat, chain, ap, of: of_, empty } = require ('fantasy-land')
 const a = $.TypeVariable ('a')
 

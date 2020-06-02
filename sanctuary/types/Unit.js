@@ -2,7 +2,7 @@
 /* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
 const daggy = require ('daggy')
 const $ = require ('sanctuary-def')
-const { uncurry } = require ('./curry')
+const { uncurry } = require ('../curry')
 
 /* Unit */
 

@@ -1,5 +1,5 @@
 const util = require('util')
-const { type, show, $, S: _S, uncurry } = require('./sanctuary') ()
+const { type, show, $, S: _S, uncurry } = require('./sanctuary')()
 
 const writerTypeIdent = 'jws/Writer@1'
 

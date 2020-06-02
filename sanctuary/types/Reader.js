@@ -6,7 +6,7 @@ const daggy = require ('daggy')
 const $ = require ('sanctuary-def')
 const S = require ('sanctuary')
 const util = require ('util')
-const { uncurry } = require ('./curry')
+const { uncurry } = require ('../curry')
 const { map, chain, ap, of: of_ } = require ('fantasy-land')
 
 /**
@@ -20,7 +20,7 @@ const Reader_ = daggy.tagged ('Reader', ['run'])
 /* Type-Checking */
 
 const $Reader = uncurry ($.NullaryType) (
-  '$Reader',
+  'Reader',
   'https://',
   [],
   r => r instanceof Reader_,
@@ -84,7 +84,6 @@ Object.assign (Reader_, $static)
 module.exports = {
   Reader,
   $Reader,
-  Reader_,
 }
 
 // Example:
