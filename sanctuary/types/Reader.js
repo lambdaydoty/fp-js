@@ -28,7 +28,7 @@ const $Reader = uncurry ($.NullaryType) (
 
 const def = $.create ({ checkTypes: true, env: [...$.env, $Reader] })
 
-// ∷ (* →  *) → Reader (* → *)
+// ∷ (* → *) → Reader (* → *)
 const Reader = uncurry (def) (
   'Reader',
   {},

@@ -1,5 +1,5 @@
 /* eslint func-call-spacing: ["error", "always"] */
-const { Z, S, $, uncurry, def } = require ('../sanctuary')
+const { show, Z, S, $, uncurry, def } = require ('../sanctuary') ()
 const Identity = require ('sanctuary-identity')
 
 const first = S.mapLeft
@@ -15,37 +15,50 @@ const bimap3 =
     f2 =>
       S.compose (second (f2)) (first (f1))
 
-;(function () {
-  /* The Bifunctor of Product */
+;(function Bifunctor () {
+  console.log ('')
+  console.log ('Bifunctor')
 
-  const x = S.Pair ('foo') (64)
+  const x = S.Pair ('foo') (42)
   const g = S.toUpper
   const h = Math.sqrt
 
   console.log ('')
-  console.log (S.bimap (g) (h) (x))
-  console.log (bimap2 (g) (h) (x))
-  console.log (bimap3 (g) (h) (x))
+  console.log (`
+    S.bimap (g) (h) (${show (x)}) === ${show (S.bimap (g) (h) (x))}
+    bimap2 (g) (h) (${show (x)}) === ${show (bimap2 (g) (h) (x))}
+    bimap3 (g) (h) (${show (x)}) === ${show (bimap3 (g) (h) (x))}
+  `)
 }) ()
 
-;(function () {
-  /* The Bifunctor of Either */
+;(function EitherBifunctor () {
+  console.log ('')
+  console.log ('EitherBifunctor')
 
-  const x = S.Left ('left')
-  const y = S.Right (64)
+  const x = S.Left ('foo')
+  const y = S.Right (42)
   const g = S.toUpper
   const h = Math.sqrt
 
   console.log ('')
-  console.log (S.bimap (g) (h) (x))
-  console.log (bimap2 (g) (h) (x))
-  console.log (bimap3 (g) (h) (x))
-  console.log (S.bimap (g) (h) (y))
-  console.log (bimap2 (g) (h) (y))
-  console.log (bimap3 (g) (h) (y))
+  console.log (`
+    S.bimap (g) (h) (${show (x)}) === ${show (S.bimap (g) (h) (x))}
+    bimap2 (g) (h) (${show (x)}) === ${show (bimap2 (g) (h) (x))}
+    bimap3 (g) (h) (${show (x)}) === ${show (bimap3 (g) (h) (x))}
+  `)
+
+  console.log ('')
+  console.log (`
+    S.bimap (g) (h) ${show (y)} === ${show (S.bimap (g) (h) (y))}
+    bimap2 (g) (h) ${show (y)} === ${show (bimap2 (g) (h) (y))}
+    bimap3 (g) (h) ${show (y)} === ${show (bimap3 (g) (h) (y))}
+  `)
 }) ()
 
-;(function () {
+;(function AlgebraicMaybeBifunctor () {
+  console.log ('')
+  console.log ('AlgebraicMaybeBifunctor')
+
   const $Maybe =
     a =>
       $.Either ($.Null) ($.Identity (a))
@@ -58,44 +71,54 @@ const bimap3 =
     S.Left (null)
 
   console.log ('')
-  console.log (S.is ($Maybe ($.String)) (Just ('hello')))
-  console.log (S.is ($Maybe ($.String)) (Nothing))
+  console.log (`
+    S.is ($Maybe ($.String)) (Just ('hello'))) === ${show (
+    S.is ($Maybe ($.String)) (Just ('hello'))
+  )}`)
+  console.log (`
+    S.is ($Maybe ($.String)) (Nothing)) === ${show (
+    S.is ($Maybe ($.String)) (Nothing)
+  )}`)
+
+  const M = {
+    bimap: f => g => S.bimap (f) (S.map (g)),
+  }
+
+  console.log (`
+    S.bimap (S.I) (S.toUpper) (Just ('hello')) === ${show (
+    M.bimap (S.I) (S.toUpper) (Just ('hello'))
+  )}`)
 }) ()
 
-;(function () {
-  /* The Writer Functor */
+;(function WriterFunctor () {
+  console.log ('')
+  console.log ('WriterFunctor')
 
-  const $Writer =
-    a =>
-      $.Pair (a) ($.String)
-
-  const Writer =
-    x =>
-      s =>
-        S.Pair (x) (s)
-
-  const w = Writer (42) ('')
+  const $Writer = $.Pair ($.String)
+  const Writer = S.Pair
+  const w = Writer ('') (42)
 
   console.log ('')
-  console.log (S.is ($Writer ($.Number)) (w), w)
+  console.log (`
+    S.is ($Writer ($.Number)) (${show (w)}) === ${show (
+    S.is ($Writer ($.Number)) (w)
+  )}`)
 
   const fish =
     m1 =>
       m2 =>
         x =>
           S.pair (
-            y =>
-              s1 =>
+            s1 =>
+              y =>
                 S.pair (
-                  z =>
-                    s2 =>
-                      S.Pair (z) (S.concat (s1) (s2))
+                  s2 =>
+                    z =>
+                      S.Pair (S.concat (s1) (s2)) (z)
                 ) (m2 (y))
           ) (m1 (x))
 
-  const _return =
-    x =>
-      Writer (x) ('')
+  const _return = Writer ('')
 
   /* Implement fmap by `fish` + `_return` */
   const fmap =
@@ -105,33 +128,21 @@ const bimap3 =
           _return (f (x))
       )
 
-  const inc = x => Writer (x + 1) ('Increased by 1, ')
-  const sq = x => Writer (x * x) ('Squared, ')
+  const inc = x => Writer ('Increased by 1, ') (x => x + 1)
+  const sq = x => Writer ('Squared, ') (x * x)
 
-  console.log (fish (inc) (sq) (1))
-  console.log (fmap (x => x * 10) (w))
+  console.log ('')
+  console.log (`
+    fish (inc) (sq) (1) === ${fish (inc) (sq) (1)}
+    fmap (x => x * 10) (${show (w)}) === ${show (fmap (x => x * 10) (w))}
+  `)
 }) ()
 
-;(function () {
-  /* The Reader Functor */
+;(function Contravariant () {
+  console.log ('')
+  console.log ('Contravariant')
 
-  // const $Reader =
-  //   r => // stands for the return type
-  //     a => // stands for the argument type
-  //       $.Function ([r, a])
-
-  /* The Contravariant Functor */
-  // f :: a -> f a
-  // fmap :: (a -> b) -> f a -> f b
-  // contramap :: (b -> a) -> f a -> f b
-
-  const $Op =
-    r =>
-      a =>
-        $.Function ([a, r])
-
-  /* ($Op (r)) is a Contravariant Functor */
-
+  // ∷ String → NonNegativeInteger
   const length = uncurry (def) (
     'length',
     {},
@@ -139,6 +150,7 @@ const bimap3 =
     s => s.length,
   )
 
+  // ∷ NonNegativeInteger → PositiveNumber
   const sqrt = uncurry (def) (
     'sqrt',
     {},
@@ -146,33 +158,17 @@ const bimap3 =
     x => Math.sqrt (x),
   )
 
-  console.log ('')
-  console.log (
-    S.is (
-      $Op ($.PositiveNumber) ($.NonNegativeInteger)
-    ) (sqrt)
-  )
-  console.log (
-    S.is (
-      $Op ($.PositiveNumber) ($.String)
-    ) (S.contramap (length) (sqrt))
-  )
-  console.log (
-    S.contramap (length) (sqrt) ('Hello'), // contramap `length` over `sqrt` Functor (預先處理: 根號前先取長度)
-    S.map (sqrt) (length) ('Hello'), // map `sqrt` over `length` Functor
-  )
+  const contramap2 = S.flip (S.compose)
 
-  const B = S.compose
-  const C = S.flip
-
-  console.log (
-    C (B) (length) (sqrt) ('Hello'), // map `sqrt` over `length` Functor
-    B (sqrt) (length) ('Hello'), // map `sqrt` over `length` Functor
-  )
+  console.log (`
+    S.contramap (length) (sqrt) ('Hello') === ${S.contramap (length) (sqrt) ('Hello')}
+    contramap2 (length) (sqrt) ('Hello') === ${contramap2 (length) (sqrt) ('Hello')}
+  `)
 }) ()
 
-;(function () {
-  /* Profunctor */
+;(function Profunctor () {
+  console.log ('')
+  console.log ('Profunctor')
 
   const countWords =
     listOfWords =>
@@ -203,7 +199,6 @@ const bimap3 =
   )
 
   const a = $.TypeVariable ('a')
-  // const f = $.UnaryTypeVariable ('f')
 
   const safePrint = uncurry (def) (
     'safePrint',
@@ -212,8 +207,10 @@ const bimap3 =
     print,
   )
 
-  console.log (ZShowable.test (3), safePrint (1234))
-  //                        vv postprocess
+  console.log ('')
+  console.log (`
+    S.promap (S.splitOn ('-')) (safePrint) (safeCountWords) ('snake-case-string')
+  `)
   S.promap (S.splitOn ('-')) (safePrint) (safeCountWords) ('snake-case-string')
-  //        ^^ preprocess              ^^ main task
+  //        ^^ preprocess                 ^^ main task
 }) ()
