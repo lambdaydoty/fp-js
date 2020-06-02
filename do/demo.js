@@ -170,6 +170,7 @@ const { $, S, def, uncurry } = require ('../sanctuary') ()
 
   // :: a -> M a
   // :: a -> (a -> m) -> m
+  // = T combinator
   const ret =
     a =>
       k =>

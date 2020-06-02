@@ -1,4 +1,4 @@
-const { S, F, U } = require('./sanc')
+const { S, F, U } = require('./sanctuary')
 const log = x => y => console.log(x, y)
 const { fork, resolve } = F
 const ap = U.uncurry(S.ap)
