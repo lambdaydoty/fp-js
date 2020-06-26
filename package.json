@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bignumber.js": "^9.0.0",
     "bower": "^1.8.8",
     "co": "^4.6.0",
     "daggy": "^1.4.0",
@@ -23,6 +24,7 @@
     "fantasy-readers": "0.0.1",
     "fantasydo": "0.0.0",
     "fluture": "^12.2.0",
+    "fluture-node": "^2.1.0",
     "fluture-sanctuary-types": "^5.0.0",
     "folktale": "^2.3.2",
     "js-priority-queue": "^0.1.5",
