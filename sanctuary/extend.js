@@ -2,63 +2,91 @@
 /* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
 
 const F = require ('fluture')
+const FN = require ('fluture-node')
 
 /*
  * Some helper functions to extend Sanctuary
  */
-module.exports =
-  s => {
-    const B = s.compose
+module.exports = s => {
+  const B = s.compose
 
-    const maybeToFuture = a => s.maybe (F.reject (a)) (F.resolve)
+  return {
+    maybeToFuture,   // ∷ a → Maybe b → Future a b
+    eitherToFuture,  // ∷ Etiher a b → Future a b
+    fromNullable,    // ∷ Nullable a → Maybe a
+    repeat,          // ∷ a → Integer → [a]
+    pick,            // ∷ [String] → (StrMap a) → (StrMap a)
+    renameKey,       // ∷ String → String → Object → Object
+    renameKeys,      // ∷ StrMap String → Object → Object
+    imToOkJson,      // ∷ IncomingMessage → Future Error Json
+  }
 
-    const eitherToFuture = s.either (F.reject) (F.resolve)
+  function maybeToFuture (rej) {
+    return s.maybe (F.reject (rej)) (F.resolve)
+  }
 
-    const fromNullable = s.compose (s.eitherToMaybe) (s.tagBy (x => x != null))
+  function eitherToFuture (e) {
+    const fn = s.either (F.reject) (F.resolve)
+    return fn (e)
+  }
 
-    const repeat =
-      x =>
-        n =>
-          s.unfoldr (i => i < n ? s.Just (s.Pair (x) (i + 1)) : s.Nothing) (0)
+  function fromNullable (x) {
+    const fn = s.compose (s.eitherToMaybe) (s.tagBy (x => x != null))
+    return fn (x)
+  }
 
-    const pick =
-      s.pipe ([
-        s.ap (s.zip) (B (repeat (s.I)) (s.size)), // ∷ Pair string (a → a)
-        s.fromPairs,                              // ∷ strMap (a → a)
-        s.ap,                                     // ∷ (strMap a) → (strMap a)
-      ])
+  function repeat (x) {
+    return function (n) {
+      return s.unfoldr (i => i < n ? s.Just (s.Pair (x) (i + 1)) : s.Nothing) (0)
+    }
+  }
 
-    // ∷ String → String → Object → Object
-    const renameKey =
-      oldKey =>
-        newKey =>
-          ({ [oldKey]: value, ...o }) => ({ ...o, [newKey]: value })
+  function pick (ss) {
+    const fn = s.pipe ([
+      s.ap (s.zip) (B (repeat (s.I)) (s.size)), // ∷ Pair string (a → a)
+      s.fromPairs,                              // ∷ strMap (a → a)
+      s.ap,                                     // ∷ (strMap a) → (strMap a)
+    ])
+    return fn (ss)
+  }
 
-    // ∷ StrMap String → Object → Object
-    // ∷ { a: b } ⇒ { a: * } ⇒ { b: * }
-    const renameKeys = s.pipe ([
+  // ∷ String → String → Object → Object
+  function renameKey (oldKey) {
+    return function (newKey) {
+      return ({ [oldKey]: value, ...o }) => ({ ...o, [newKey]: value })
+    }
+  }
+
+  // ∷ StrMap String → Object → Object
+  // ∷ { a: 'b' } ⇒ { a: * } ⇒ { b: * }
+  function renameKeys (map) {
+    const fn = s.pipe ([
       s.pairs,                    // ∷ [Pair String String]
       s.map (s.pair (renameKey)), // ∷ [Object → Object]
       s.pipe,                     // ∷ Object → Object
     ])
-
-    return {
-      maybeToFuture,   // ∷ a → Maybe b → Future a b
-      eitherToFuture,  // ∷ Etiher a b → Future a b
-      fromNullable,    // ∷ Nullable a → Maybe a
-      repeat,          // ∷ a → Integer → [a]
-      pick,            // ∷ [String] → (StrMap a) → (StrMap a)
-      renameKey,       // ∷ String → String → Object → Object
-      renameKeys,      // ∷ StrMap String → Object → Object
-    }
+    return fn (map)
   }
+
+  // ∷ IncomingMessage → Future Error Json
+  function imToOkJson (im) {
+    const fn = s.pipe ([
+      F.resolve,
+      F.chain (FN.acceptStatus (200)),
+      F.chainRej (FN.responseToError),
+      F.chain (FN.bufferResponse ('utf8')),
+      F.chain (F.encase (JSON.parse)),
+    ])
+    return fn (im)
+  }
+}
 
 /**
  * Egs:
  *
  * const opts = renameKeys ({
- *   HOST: host,
- *   KEY: private_key,
+ *   HOST: 'host',
+ *   KEY: 'private_key',
  * }) (process.env)
  *
  * let i = 2

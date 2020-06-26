@@ -1,9 +1,10 @@
 /* eslint func-call-spacing: ["error", "always"] */
 /* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
-const S_ = require ('sanctuary')
+const S0 = require ('sanctuary')
 const $ = require ('sanctuary-def')
 const F = require ('fluture')
 const F$ = require ('fluture-sanctuary-types')
+const FN = require ('fluture-node')
 const Z = require ('sanctuary-type-classes')
 const show = require ('sanctuary-show')
 const type = require ('sanctuary-type-identifiers')
@@ -12,7 +13,7 @@ const daggy = require ('daggy')
 const types = require ('./types')
 
 const env0 = [
-  ...S_.env,
+  ...S0.env,
   ...F$.env,
   types.$Unit,
   types.$List ($.Unknown),
@@ -24,38 +25,36 @@ const { uncurry } = require ('./curry')
 /*
  * Uncurry defining functions in $ for convenience
  */
-const uncurrys =
-  def =>
-    S_.pipe ([
-      S_.ap (S_.zip) (S_.map (fn => $[fn])), // ∷ [Pair String Function]
-      S_.map (S_.map (uncurry)),             // ∷ [Pair String UncurriedFunction]
-      S_.prepend (S_.Pair ('def') (uncurry (def))),
-      S_.fromPairs,                          // ∷ StrMap UncurriedFunction
-    ]) ([
-      'NullaryType',
-      'UnaryType',
-      'BinaryType',
-      'EnumType',
-      'RecordType',
-      'NamedRecordType',
-    ])
+const uncurrys = def =>
+  S0.pipe ([
+    S0.ap (S0.zip) (S0.map (fn => $[fn])), // ∷ [Pair String Function]
+    S0.map (S0.map (uncurry)),             // ∷ [Pair String UncurriedFunction]
+    S0.prepend (S0.Pair ('def') (uncurry (def))),
+    S0.fromPairs,                          // ∷ StrMap UncurriedFunction
+  ]) ([
+    'NullaryType',
+    'UnaryType',
+    'BinaryType',
+    'EnumType',
+    'RecordType',
+    'NamedRecordType',
+  ])
 
-module.exports =
-  (env = [/* types */]) => {
-    const S = S_.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
-    const def = $.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
-    const D = uncurrys (def)
-    const E = extend (S)
-    E.unchecked = extend (S.unchecked)
+module.exports = function (env = [/* types */]) {
+  const S = S0.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
+  const def = $.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
+  const D = uncurrys (def)
+  const E = extend (S)
+  E.unchecked = extend (S.unchecked)
 
-    return {
-      daggy,
-      ...{ Z, $, F, F$, S, E },
-      ...{ D, def, show, type },
-      ...require ('./curry'),
-      ...require ('./types'),
-    }
+  return {
+    daggy,
+    ...{ Z, $, F, F$, FN, S, E },
+    ...{ D, def, show, type },
+    ...require ('./curry'),
+    ...require ('./types'),
   }
+}
 
 /* example */
 
