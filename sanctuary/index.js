@@ -40,12 +40,19 @@ const uncurrys = def =>
     'NamedRecordType',
   ])
 
+const Union =
+  name => // ∷ String
+    url => // ∷ String
+      types => // ∷ [Type]
+        $.NullaryType (name) (url) ([]) (x => S0.any (S0.flip (S0.is) (x)) (types))
+
 module.exports = function (env = [/* types */]) {
   const S = S0.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
   const def = $.create ({ checkTypes: true, env: [ ...env, ...env0 ] })
   const D = uncurrys (def)
   const E = extend (S)
   E.unchecked = extend (S.unchecked)
+  D.Union = Union
 
   return {
     daggy,

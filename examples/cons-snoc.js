@@ -1,8 +1,8 @@
 /* eslint func-call-spacing: ["error", "always"] */
 /* eslint no-multi-spaces: ["error", { ignoreEOLComments: true }] */
-const { S } = require ('./sanctuary') ()
+const { S } = require ('../sanctuary') ()
 const R = require ('ramda')
-const { Cons, Nil } = require ('./sanctuary/types/List')
+const { Cons, Nil } = require ('../sanctuary/types/List')
 
 const arr = [1, 2, 3, 4]
 const cons =
